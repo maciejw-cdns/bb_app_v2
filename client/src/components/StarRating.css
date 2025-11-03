@@ -1,0 +1,44 @@
+.rating {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.stars {
+  display: flex;
+  gap: 3px;
+}
+
+.star-wrapper {
+  position: relative;
+  display: inline-block;
+  font-size: 24px;
+  line-height: 1;
+  width: 1em;
+  height: 1em;
+}
+
+.star-empty {
+  color: #555;
+  position: relative;
+  display: block;
+}
+
+.star-filled {
+  position: absolute;
+  top: 0;
+  left: 0;
+  color: #ffb300;
+  overflow: hidden;
+  white-space: nowrap;
+  height: 1em;
+}
+
+.rating-value {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #e0e0e0;
+  padding: 0.2rem 0.4rem;
+  background-color: rgba(255, 179, 0, 0.2);
+  border-radius: 4px;
+}

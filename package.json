@@ -1,0 +1,24 @@
+{
+  "name": "beer-brothers-checkins",
+  "version": "1.0.0",
+  "description": "Display last 4 check-ins from Beer Brothers venue on Untappd",
+  "main": "server/index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "server": "node server/index.js",
+    "client": "cd client && npm run dev",
+    "install-all": "npm install && cd client && npm install",
+    "build": "cd client && npm run build"
+  },
+  "dependencies": {
+    "axios": "^1.6.2",
+    "cheerio": "1.0.0-rc.5",
+    "cors": "^2.8.5",
+    "express": "^4.18.2"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
+
