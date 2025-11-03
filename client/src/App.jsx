@@ -47,7 +47,7 @@ function App() {
   const fetchCheckins = async () => {
     try {
       setLoadingCheckins(true);
-      const response = await fetch('http://localhost:3001/api/checkins');
+      const response = await fetch('/api/checkins');
       if (!response.ok) {
         throw new Error('Failed to fetch check-ins');
       }
@@ -65,7 +65,7 @@ function App() {
   const fetchBeers = async () => {
     try {
       setLoadingBeers(true);
-      const response = await fetch('http://localhost:3001/api/beers');
+      const response = await fetch('/api/beers');
       if (!response.ok) {
         throw new Error('Failed to fetch beers');
       }
