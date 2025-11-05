@@ -100,17 +100,40 @@ async function scrapeCheckins() {
         rating = ratingAttr ? `${ratingAttr}` : '';
       }
 
-      // Extract description - get text before badges
+      // Extract description - only get the actual comment text
       let description = '';
       const commentDiv = $element.find('.checkin-comment');
       if (commentDiv.length > 0) {
-        // Clone the element and remove badges and other elements
+        // Clone the comment div to work with
         const $clone = commentDiv.clone();
-        $clone.find('.badge, .rating-serving, .translate').remove();
-        description = $clone.text()
+        
+        // Remove ALL unwanted elements BEFORE extracting text
+        $clone.find('a').remove(); // Remove all links (venue, user tags, etc.)
+        $clone.find('span').remove(); // Remove all spans
+        $clone.find('.badge').remove();
+        $clone.find('.rating-serving').remove();
+        $clone.find('.translate').remove();
+        $clone.find('.tagged-friends').remove();
+        $clone.find('.with-friends').remove();
+        $clone.find('.comment-friends').remove();
+        $clone.find('.check-in_details').remove();
+        $clone.find('.venue').remove();
+        
+        // Get remaining text
+        let text = $clone.text()
           .replace(/\s+/g, ' ')
-          .replace('Translate', '')
           .trim();
+        
+        // Clean up any remaining metadata patterns that slipped through
+        text = text
+          .split(/(?:Purchased at|Drinking at|Tagged Friends|Translate)/i)[0] // Take only text BEFORE these phrases
+          .replace(/\s+/g, ' ')
+          .trim();
+        
+        // Only set description if there's actual content left (more than just a few chars)
+        if (text && text.length > 10) {
+          description = text;
+        }
       }
 
       // Extract beer photo
