@@ -2,7 +2,6 @@ import express from 'express';
 import cors from 'cors';
 import axios from 'axios';
 import * as cheerio from 'cheerio';
-import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -159,32 +158,99 @@ async function scrapeCheckins() {
   }
 }
 
-// Function to parse beers from text file
-async function parseBeersFile() {
+// Function to scrape beers from ontap.pl
+async function scrapeOntapBeers() {
   try {
-    const beersFilePath = path.join(__dirname, '..', 'beers.txt');
-    const fileContent = await fs.readFile(beersFilePath, 'utf-8');
-    const lines = fileContent.split('\n').filter(line => line.trim());
-    
-    const beers = lines.map(line => {
-      // Parse format: "1. Brewery: <name> ; Beer: <name> ; Style: <style> ; Blg: <blg> ; ABV: <abv>"
-      const match = line.match(/^\d+\.\s*Brewery:\s*(.+?)\s*;\s*Beer:\s*(.+?)\s*;\s*Style:\s*(.+?)\s*;\s*Blg:\s*(.+?)\s*;\s*ABV:\s*(.+?)$/);
-      
-      if (match) {
-        return {
-          brewery: match[1].trim(),
-          beer: match[2].trim(),
-          style: match[3].trim(),
-          blg: match[4].trim(),
-          abv: match[5].trim()
-        };
+    const url = 'https://beer-brothers.ontap.pl/';
+    const response = await axios.get(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
       }
-      return null;
-    }).filter(beer => beer !== null);
-    
+    });
+
+    const $ = cheerio.load(response.data);
+    const beers = [];
+
+    $('.panel.panel-default').each((index, element) => {
+      const $el = $(element);
+      const $body = $el.find('.panel-body.cml_semi');
+      if (!$body.length) return;
+
+      // Tap number
+      const tapNumber = $body.find('h5 span.label-primary').text().trim();
+      if (!tapNumber) return;
+
+      // Brewery name (remove trailing " Brewery" or " Browar")
+      const breweryRaw = $body.find('b.brewery').text().trim();
+      const brewery = breweryRaw
+        .replace(/\s*Brewery\s*$/, '')
+        .replace(/\s*Browar\s*$/, '')
+        .trim();
+
+      // Beer name and ABV/BLG from h4.cml_shadow > span
+      const $h4span = $body.find('h4.cml_shadow span');
+      const h4Html = $h4span.html() || '';
+      
+      // Split by <br/> to get parts: [brewery, "beerName <img...>", "specs"]
+      const parts = h4Html.split(/<br\s*\/?>/i).map(p => {
+        // Remove HTML tags and decode entities
+        return cheerio.load(`<span>${p}</span>`)('span').text().trim();
+      });
+
+      // Beer name is in parts[1] (after brewery)
+      const beer = (parts[1] || '').replace(/Polska\s*$/i, '').trim();
+
+      // Skip empty taps (N/A or no beer name)
+      if (!beer || beer === 'N/A') return;
+
+      // ABV and BLG are in parts[2], e.g. "16°·6%" or "5%"
+      const specsRaw = (parts[2] || '').replace(/\s+/g, '').replace(/&nbsp;/g, '');
+      let blg = '';
+      let abv = '';
+      
+      // Try to extract BLG (degrees) and ABV (percentage)
+      const blgMatch = specsRaw.match(/([\d,.]+)°/);
+      if (blgMatch) {
+        blg = blgMatch[1].replace(',', '.');
+      }
+      const abvMatch = specsRaw.match(/([\d,.]+)%/);
+      if (abvMatch) {
+        abv = abvMatch[1].replace(',', '.') + '%';
+      }
+
+      // Style from span.cml_shadow > b
+      const style = $body.find('span.cml_shadow b').text().trim().replace(/\s+/g, ' ');
+
+      // Price from panel-footer
+      const price = $el.find('.panel-footer .col-xs-7').text().trim().replace(/\s+/g, ' ');
+
+      // On tap duration
+      const onTapLabel = $body.find('span.label-default.label-small');
+      const onTap = onTapLabel.find('span').text().trim();
+
+      // Tags (New, Premiere)
+      const tags = [];
+      $body.find('span.label-warning.label-small').each((i, tag) => {
+        tags.push($(tag).text().trim());
+      });
+
+      beers.push({
+        tapNumber,
+        brewery,
+        beer,
+        style,
+        blg,
+        abv,
+        price,
+        onTap,
+        isNew: tags.includes('New'),
+        isPremiere: tags.includes('Premiere')
+      });
+    });
+
     return beers;
   } catch (error) {
-    console.error('Error reading beers file:', error.message);
+    console.error('Error scraping ontap.pl:', error.message);
     throw error;
   }
 }
@@ -200,7 +266,7 @@ app.get('/api/checkins', async (req, res) => {
 
 app.get('/api/beers', async (req, res) => {
   try {
-    const beers = await parseBeersFile();
+    const beers = await scrapeOntapBeers();
     res.json(beers);
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch beers' });

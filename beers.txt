@@ -4,7 +4,7 @@
 4. Brewery: Browar Nepomucen ; Beer: Golden Ale ; Style: Golden Ale ; Blg: 12.0 ; ABV: 5.0%
 5. Brewery: Funky Fluid ; Beer: Tropical Thunder ; Style: New England IPA ; Blg: 14.5 ; ABV: 6.8%
 6. Brewery: Pinta ; Beer: Atak Chmielu ; Style: India Pale Ale ; Blg: 15.0 ; ABV: 6.5%
-7. Brewery: Kraftwerk ; Beer: Rye Session IPA ; Style: Session IPA ; Blg: 10.5 ; ABV: 4.5%
+7. Brewery: Beer Brother ; Beer: Rye Session IPA ; Style: Session IPA ; Blg: 10.5 ; ABV: 4.5%
 8. Brewery: Browar Widawa ; Beer: Pszeniczne ; Style: Hefeweizen ; Blg: 12.5 ; ABV: 5.3%
 9. Brewery: AleBrowar ; Beer: Barley Wine ; Style: Barley Wine ; Blg: 22.0 ; ABV: 10.5%
 10. Brewery: Browar Zamkowy Cieszyn ; Beer: Zamkowe Jasne ; Style: Pilsner ; Blg: 11.5 ; ABV: 5.2%

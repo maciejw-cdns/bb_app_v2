@@ -1,22 +1,31 @@
 import './BeerListItem.css';
 
 function BeerListItem({ beer, number }) {
-  const { brewery, beer: beerName, style, blg, abv } = beer;
+  const { tapNumber, brewery, beer: beerName, style, blg, abv, price, onTap, isNew, isPremiere } = beer;
 
   return (
     <div className="beer-list-item">
-      <div className="beer-number">{number}</div>
-      <div className="beer-brewery">{brewery}</div>
-      <div className="beer-name-col">{beerName}</div>
+      <div className="beer-number">{tapNumber || number}</div>
+      <div className="beer-info-main">
+        <div className="beer-brewery">{brewery}</div>
+        <div className="beer-name-col">{beerName}</div>
+      </div>
       <div className="beer-style">{style}</div>
       <div className="beer-specs">
-        <span className="spec-item">BLG: <strong>{blg}</strong></span>
-        <span className="spec-divider">|</span>
-        <span className="spec-item">ABV: <strong>{abv}</strong></span>
+        {blg && <span className="spec-item">BLG: <strong>{blg}°</strong></span>}
+        {blg && abv && <span className="spec-divider">|</span>}
+        {abv && <span className="spec-item">ABV: <strong>{abv}</strong></span>}
+      </div>
+      <div className="beer-meta">
+        {price && <span className="beer-price">{price}</span>}
+        <span className="beer-tags">
+          {onTap && <span className="beer-ontap">{onTap}</span>}
+          {isNew && <span className="beer-tag new">New</span>}
+          {isPremiere && <span className="beer-tag premiere">Premiere</span>}
+        </span>
       </div>
     </div>
   );
 }
 
 export default BeerListItem;
-
