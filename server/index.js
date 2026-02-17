@@ -199,9 +199,7 @@ async function scrapeOntapBeers() {
 
       // Beer name is in parts[1] (after brewery)
       const beer = (parts[1] || '').replace(/Polska\s*$/i, '').trim();
-
-      // Skip empty taps (N/A or no beer name)
-      if (!beer || beer === 'N/A') return;
+      const isEmpty = !beer || beer === 'N/A';
 
       // ABV and BLG are in parts[2], e.g. "16°·6%" or "5%"
       const specsRaw = (parts[2] || '').replace(/\s+/g, '').replace(/&nbsp;/g, '');
@@ -236,19 +234,43 @@ async function scrapeOntapBeers() {
 
       beers.push({
         tapNumber,
-        brewery,
-        beer,
-        style,
-        blg,
-        abv,
-        price,
-        onTap,
-        isNew: tags.includes('New'),
-        isPremiere: tags.includes('Premiere')
+        brewery: isEmpty ? '' : brewery,
+        beer: isEmpty ? 'N/A' : beer,
+        style: isEmpty ? '' : style,
+        blg: isEmpty ? '' : blg,
+        abv: isEmpty ? '' : abv,
+        price: isEmpty ? '' : price,
+        onTap: isEmpty ? '' : onTap,
+        isNew: isEmpty ? false : tags.includes('New'),
+        isPremiere: isEmpty ? false : tags.includes('Premiere'),
+        isEmpty
       });
     });
 
-    return beers;
+    // Ensure we always return exactly 16 taps
+    const allTaps = [];
+    for (let i = 1; i <= 16; i++) {
+      const existing = beers.find(b => parseInt(b.tapNumber) === i);
+      if (existing) {
+        allTaps.push(existing);
+      } else {
+        allTaps.push({
+          tapNumber: String(i),
+          brewery: '',
+          beer: 'N/A',
+          style: '',
+          blg: '',
+          abv: '',
+          price: '',
+          onTap: '',
+          isNew: false,
+          isPremiere: false,
+          isEmpty: true
+        });
+      }
+    }
+
+    return allTaps;
   } catch (error) {
     console.error('Error scraping ontap.pl:', error.message);
     throw error;

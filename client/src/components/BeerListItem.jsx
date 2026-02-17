@@ -1,10 +1,10 @@
 import './BeerListItem.css';
 
 function BeerListItem({ beer, number }) {
-  const { tapNumber, brewery, beer: beerName, style, blg, abv, price, onTap, isNew, isPremiere } = beer;
+  const { tapNumber, brewery, beer: beerName, style, blg, abv, price, onTap, isNew, isPremiere, isEmpty } = beer;
 
   return (
-    <div className="beer-list-item">
+    <div className={`beer-list-item${isEmpty ? ' beer-list-item--empty' : ''}`}>
       <div className="beer-number">{tapNumber || number}</div>
       <div className="beer-info-main">
         <div className="beer-brewery">{brewery}</div>
